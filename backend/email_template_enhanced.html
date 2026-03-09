@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CChanTrader-AI 智能交易日报</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e293b;
+            line-height: 1.6;
+            font-size: 14px;
+            padding: 20px 10px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: white;
+            padding: 40px 32px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.03)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.5;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        
+        .header-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(59, 130, 246, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header-subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+        
+        .date-badge {
+            display: inline-block;
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            margin-top: 16px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        /* Market Overview */
+        .market-overview {
+            padding: 32px;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #10b981, #f59e0b, #ef4444);
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Recommendations */
+        .recommendations {
+            padding: 32px;
+        }
+        
+        .stock-grid {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .stock-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stock-card.very-high {
+            border-left: 4px solid #22c55e;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+        }
+        
+        .stock-card.high {
+            border-left: 4px solid #3b82f6;
+            background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+        }
+        
+        .stock-card.medium {
+            border-left: 4px solid #f59e0b;
+            background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+        }
+        
+        .stock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .stock-basic {
+            flex: 1;
+        }
+        
+        .stock-symbol {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+        
+        .stock-name {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        
+        .market-badge {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .confidence-badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .confidence-very-high {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .confidence-high {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .confidence-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .stock-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .metric {
+            text-align: center;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .metric-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 2px;
+        }
+        
+        .metric-label {
+            font-size: 10px;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .price-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .price-item {
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        .current-price {
+            background: #f0f9ff;
+            color: #0369a1;
+        }
+        
+        .entry-price {
+            background: #f0fdf4;
+            color: #166534;
+        }
+        
+        .target-price {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .strategy-info {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.5;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 32px;
+            text-align: center;
+        }
+        
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .disclaimer {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 24px 0;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #dc2626;
+        }
+        
+        .footer-links {
+            margin-top: 20px;
+            font-size: 12px;
+        }
+        
+        .footer-links a {
+            color: #60a5fa;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 24px 16px;
+            }
+            
+            .market-overview,
+            .recommendations,
+            .footer {
+                padding: 20px 16px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stock-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .price-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-logo">
+                    📊 CChanTrader-AI
+                </div>
+                <h1 class="header-title">智能交易日报</h1>
+                <p class="header-subtitle">专业股票分析与投资建议</p>
+                <div class="date-badge">{{date}} {{analysis_time}}</div>
+            </div>
+        </div>
+
+        <!-- Market Overview -->
+        <div class="market-overview">
+            <h2 class="section-title">
+                <span class="section-icon">📈</span>
+                市场概览
+            </h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{total_analyzed}}</div>
+                    <div class="stat-label">分析股票数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{recommendations|length}}</div>
+                    <div class="stat-label">推荐股票数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{high_confidence_count}}</div>
+                    <div class="stat-label">强烈推荐</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{avg_score|round(3)}}</div>
+                    <div class="stat-label">平均评分</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Recommendations -->
+        <div class="recommendations">
+            <h2 class="section-title">
+                <span class="section-icon">⭐</span>
+                精选推荐 ({{recommendations|length}}只)
+            </h2>
+            
+            <div class="stock-grid">
+                {% for stock in recommendations %}
+                <div class="stock-card {{stock.confidence.replace('_', '-')}}">
+                    <div class="stock-header">
+                        <div class="stock-basic">
+                            <div class="stock-symbol">{{stock.symbol}}</div>
+                            <div class="stock-name">{{stock.stock_name}}</div>
+                            <span class="market-badge">{{stock.market}}</span>
+                        </div>
+                        <div class="confidence-badge confidence-{{stock.confidence.replace('_', '-')}}">
+                            {% if stock.confidence == 'very_high' %}强烈推荐{% elif stock.confidence == 'high' %}推荐{% else %}关注{% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="stock-metrics">
+                        <div class="metric">
+                            <div class="metric-value">{{(stock.total_score * 100)|round(1)}}%</div>
+                            <div class="metric-label">综合评分</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">{{stock.auction_ratio|round(1)}}</div>
+                            <div class="metric-label">竞价倍数</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">{{stock.market_cap_billion|round(0)}}亿</div>
+                            <div class="metric-label">市值</div>
+                        </div>
+                    </div>
+                    
+                    <div class="price-info">
+                        <div class="price-item current-price">
+                            <div style="font-weight: 600;">¥{{stock.current_price}}</div>
+                            <div style="font-size: 10px;">现价</div>
+                        </div>
+                        <div class="price-item entry-price">
+                            <div style="font-weight: 600;">¥{{stock.entry_price}}</div>
+                            <div style="font-size: 10px;">建议入场</div>
+                        </div>
+                        <div class="price-item target-price">
+                            <div style="font-weight: 600;">¥{{stock.target_price}}</div>
+                            <div style="font-size: 10px;">目标价</div>
+                        </div>
+                    </div>
+                    
+                    <div class="strategy-info">
+                        <strong>策略分析：</strong>{{stock.strategy}}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-content">
+                <div class="disclaimer">
+                    ⚠️ <strong>投资风险提示：</strong>本报告仅供参考，不构成投资建议。股市有风险，投资需谨慎。请根据自身风险承受能力，独立判断投资决策。
+                </div>
+                
+                <p style="margin-bottom: 8px;">
+                    <strong>CChanTrader-AI</strong> - 专业智能投资分析平台
+                </p>
+                <p style="font-size: 12px; color: #64748b;">
+                    基于缠论技术分析 + 竞价行为分析 + AI量化策略
+                </p>
+                
+                <div class="footer-links">
+                    <a href="#">使用指南</a> |
+                    <a href="#">风险说明</a> |
+                    <a href="#">技术支持</a>
+                </div>
+                
+                <p style="margin-top: 16px; font-size: 11px; color: #64748b;">
+                    © 2025 CChanTrader-AI. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
